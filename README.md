@@ -88,7 +88,7 @@ Full-stack Next.js application with authentication, repository management, and b
 
 ```bash
 cd web
-npm install
+npm install --legacy-peer-deps
 npm run db:push        # Setup database
 npm run dev            # Start development server
 ```
@@ -134,7 +134,7 @@ See [web/README.md](web/README.md) and documentation in `web/docs/` for more det
 5. **Setup Web App**
    ```bash
    cd web
-   npm install
+   npm install --legacy-peer-deps
    cp .env.example .env.local  # Configure environment variables
    npm run db:push
    npm run dev
