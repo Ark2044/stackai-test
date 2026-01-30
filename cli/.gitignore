@@ -1,0 +1,32 @@
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+.env
+
+# Build output
+bin/
+dist/
+
+# Go workspace files (Go 1.18+)
+go.work
+go.work.sum
+
+# Logs / caches
+*.log
+*.cache/
+
+# IDE / Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*.iml
+
+# OS files
+.DS_Store
+Thumbs.db

@@ -1,0 +1,17 @@
+[
+  {
+    "type": "blob",
+    "path": "p1.txt",
+    "hash": "8e4c7c1b99dbfd50e7a95185fead5ee1448fa904a2fdd778eaf5f2dbfd629a99"
+  },
+  {
+    "type": "blob",
+    "path": "p2.txt",
+    "hash": "dc5a4edb8240b018124052c330270696f96771a63b45250a5c17d3000e823355"
+  },
+  {
+    "type": "blob",
+    "path": "v1.pth",
+    "hash": "de9719f777dcd6ca9234baf2ec69e24d084385f71cbc2efc6c9bf4d680bd9c35"
+  }
+]
