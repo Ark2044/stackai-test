@@ -40,7 +40,7 @@ export default function SignPage() {
         <div className="mt-6 text-center">
           <p className="text-sm text-muted-foreground">
             Already have an account?{" "}
-            <a href="/login" className="text-primary hover:underline font-medium">
+            <a href="/login" className="text-primary hover:underline font-medium cursor-pointer">
               Sign in
             </a>
           </p>

@@ -150,83 +150,117 @@ export function TransactionHistory() {
     }
   };
 
-  if (!address) {
-    return (
-      <div className="card-glass rounded-2xl p-8 text-center">
-        <History className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-        <h3 className="text-xl font-semibold mb-2">Transaction History</h3>
-        <p className="text-muted-foreground">
-          Connect your wallet to view transaction history
-        </p>
-      </div>
-    );
-  }
-
-  return (
-    <div className="card-glass rounded-2xl overflow-hidden">
-      {/* Header */}
-      <div className="p-6 border-b border-border/50">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div className="flex items-center gap-4">
-            <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-primary/20 to-accent/20">
-              <History className="h-6 w-6 text-primary" />
-            </div>
-            <div>
-              <h3 className="text-xl font-bold tracking-tight">Transaction History</h3>
-              <p className="text-sm text-muted-foreground">
-                Your staking and reward transactions
-              </p>
-            </div>
-          </div>
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={loadTransactions} 
-            disabled={isLoading}
-            className="group rounded-xl border-2 hover:border-primary/50 hover:bg-primary/5 transition-all duration-300"
-          >
-            {isLoading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Loading...
-              </>
-            ) : (
-              <>
-                <RefreshCw className="mr-2 h-4 w-4 group-hover:rotate-180 transition-transform duration-500" />
-                Refresh
-              </>
-            )}
-          </Button>
+  // Use conditional rendering instead of early return to avoid hooks issues
+  const renderContent = () => {
+    if (!address) {
+      return (
+        <div className="card-glass rounded-2xl p-8 text-center">
+          <History className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+          <h3 className="text-xl font-semibold mb-2">Transaction History</h3>
+          <p className="text-muted-foreground">
+            Connect your wallet to view transaction history
+          </p>
         </div>
-      </div>
-      
-      {/* Content */}
-      <div className="p-6">
-        {isLoading ? (
-          <div className="flex flex-col items-center justify-center py-16">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="w-16 h-16 rounded-full bg-primary/20 animate-ping opacity-30" />
+      );
+    }
+
+    if (isLoading) {
+      return (
+        <div className="card-glass rounded-2xl overflow-hidden">
+          <div className="p-6 border-b border-border/50">
+            <div className="flex items-center gap-4">
+              <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-primary/20 to-accent/20">
+                <History className="h-6 w-6 text-primary" />
               </div>
-              <Loader2 className="relative h-10 w-10 animate-spin text-primary" />
-            </div>
-            <span className="mt-6 text-muted-foreground font-medium">Loading transactions...</span>
-          </div>
-        ) : transactions.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 text-center">
-            <div className="flex items-center justify-center w-20 h-20 rounded-2xl bg-muted/50 mb-6">
-              <Clock className="h-10 w-10 text-muted-foreground" />
-            </div>
-            <h3 className="text-xl font-bold mb-2">No Transactions Yet</h3>
-            <p className="text-muted-foreground max-w-sm">
-              No transactions found. Place your first stake to get started and see your history here!
-            </p>
-            <div className="mt-6 flex items-center gap-2 text-sm text-primary">
-              <Sparkles className="h-4 w-4" />
-              <span>Start by browsing available models</span>
+              <div>
+                <h3 className="text-xl font-bold tracking-tight">Transaction History</h3>
+                <p className="text-sm text-muted-foreground">
+                  Your staking and reward transactions
+                </p>
+              </div>
             </div>
           </div>
-        ) : (
+          <div className="p-6">
+            <div className="flex flex-col items-center justify-center py-16">
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="w-16 h-16 rounded-full bg-primary/20 animate-ping opacity-30" />
+                </div>
+                <Loader2 className="relative h-10 w-10 animate-spin text-primary" />
+              </div>
+              <span className="mt-6 text-muted-foreground font-medium">Loading transactions...</span>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    if (transactions.length === 0) {
+      return (
+        <div className="card-glass rounded-2xl overflow-hidden">
+          <div className="p-6 border-b border-border/50">
+            <div className="flex items-center gap-4">
+              <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-primary/20 to-accent/20">
+                <History className="h-6 w-6 text-primary" />
+              </div>
+              <div>
+                <h3 className="text-xl font-bold tracking-tight">Transaction History</h3>
+                <p className="text-sm text-muted-foreground">
+                  Your staking and reward transactions
+                </p>
+              </div>
+            </div>
+          </div>
+          <div className="p-6">
+            <div className="flex flex-col items-center justify-center py-16 text-center">
+              <div className="flex items-center justify-center w-20 h-20 rounded-2xl bg-muted/50 mb-6">
+                <Clock className="h-10 w-10 text-muted-foreground" />
+              </div>
+              <h3 className="text-xl font-bold mb-2">No Transactions Yet</h3>
+              <p className="text-muted-foreground max-w-sm">
+                No transactions found. Place your first stake to get started and see your history here!
+              </p>
+              <div className="mt-6 flex items-center gap-2 text-sm text-primary">
+                <Sparkles className="h-4 w-4" />
+                <span>Start by browsing available models</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="card-glass rounded-2xl overflow-hidden">
+        {/* Header */}
+        <div className="p-6 border-b border-border/50">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-primary/20 to-accent/20">
+                <History className="h-6 w-6 text-primary" />
+              </div>
+              <div>
+                <h3 className="text-xl font-bold tracking-tight">Transaction History</h3>
+                <p className="text-sm text-muted-foreground">
+                  Your staking and reward transactions
+                </p>
+              </div>
+            </div>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={loadTransactions} 
+              disabled={isLoading}
+              className="group rounded-xl border-2 hover:border-primary/50 hover:bg-primary/5 transition-all duration-300"
+            >
+              <RefreshCw className="mr-2 h-4 w-4 group-hover:rotate-180 transition-transform duration-500" />
+              Refresh
+            </Button>
+          </div>
+        </div>
+        
+        {/* Content */}
+        <div className="p-6">
           <div className="space-y-3">
             {transactions.map((tx, index) => (
               <div
@@ -297,8 +331,10 @@ export function TransactionHistory() {
               </div>
             ))}
           </div>
-        )}
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
+
+  return renderContent();
 }

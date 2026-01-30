@@ -1,12 +1,17 @@
 "use client";
-import React, { useEffect, useState, useContext, createContext } from "react";
-import { getUser } from "~/app/api/manageUser";
-import { type User } from "@prisma/client";
+import React, { useEffect, useState, useContext, createContext, useMemo } from "react";
 import { useSession } from "next-auth/react";
 
+type AuthUser = {
+  id: string;
+  email: string;
+  name: string | null;
+};
+
 interface UserContextType {
-  user: User | null;
-  setUser: React.Dispatch<React.SetStateAction<User | null>>;
+  user: AuthUser | null;
+  setUser: React.Dispatch<React.SetStateAction<AuthUser | null>>;
+  isLoading: boolean;
 }
 
 interface UserProviderProps {
@@ -16,29 +21,35 @@ interface UserProviderProps {
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
 export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const { data: session, status } = useSession();
 
   useEffect(() => {
-    const findUser = async () => {
-      try {
-        const u = await getUser(session?.user.email as string);
-        setUser(u);
-      } catch (error) {
-        console.error("Error fetching user:", error);
-        setUser(null);
-      }
-    };
-
-    if (status === "authenticated" && session?.user?.email) {
-      findUser();
-    } else if (status === "unauthenticated") {
-      setUser(null);
+    if (status === "loading") {
+      setIsLoading(true);
+      return;
     }
-  }, [status, session]);
+
+    if (status === "authenticated" && session?.user?.id && session.user.email) {
+      setUser({
+        id: session.user.id,
+        email: session.user.email,
+        name: session.user.name ?? null,
+      });
+      setIsLoading(false);
+      return;
+    }
+
+    setUser(null);
+    setIsLoading(false);
+  }, [status, session?.user?.id, session?.user?.email, session?.user?.name]);
+
+  // Memoize context value to prevent unnecessary re-renders
+  const contextValue = useMemo(() => ({ user, setUser, isLoading }), [user, isLoading]);
 
   return (
-    <UserContext.Provider value={{ user, setUser }}>
+    <UserContext.Provider value={contextValue}>
       {children}
     </UserContext.Provider>
   );

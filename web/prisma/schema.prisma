@@ -1,10 +1,10 @@
 generator client {
   provider = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
 }
 
 datasource db {
-  provider = "mysql"
-  url      = env("DATABASE_URL")
+  provider = "postgresql"
 }
 
 model Account {
@@ -13,7 +13,7 @@ model Account {
   type                     String
   provider                 String
   providerAccountId        String
-  refresh_token            String? @db.Text
+  refresh_token            String?
   access_token             String?
   expires_at               Int?
   token_type               String?
@@ -24,7 +24,7 @@ model Account {
   user                     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
-  @@index([userId], map: "Account_userId_fkey")
+  @@index([userId])
 }
 
 model Session {
@@ -34,7 +34,7 @@ model Session {
   expires      DateTime
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@index([userId], map: "Session_userId_fkey")
+  @@index([userId])
 }
 
 model VerificationToken {
@@ -68,7 +68,7 @@ model Validator {
   votes     MergeVote[]
   user      User        @relation(fields: [userId], references: [id])
 
-  @@index([userId], map: "Validator_userId_fkey")
+  @@index([userId])
 }
 
 model MergeVote {
@@ -83,7 +83,7 @@ model MergeVote {
   validator    Validator  @relation(fields: [validatorId], references: [id])
 
   @@unique([validatorId, modelMergeId])
-  @@index([modelMergeId], map: "MergeVote_modelMergeId_fkey")
+  @@index([modelMergeId])
 }
 
 model Repository {
@@ -111,7 +111,7 @@ model Branch {
   AsBaseBranch PullRequest[] @relation("BaseBranch")
   AsNewBranch  PullRequest[] @relation("NewBranch")
 
-  @@index([repositoryId], map: "Branch_repositoryId_fkey")
+  @@index([repositoryId])
 }
 
 model Model {
@@ -125,8 +125,8 @@ model Model {
   branch     Branch       @relation(fields: [branchId], references: [id])
   ModelMerge ModelMerge[]
 
-  @@index([authorId], map: "Model_authorId_fkey")
-  @@index([branchId], map: "Model_branchId_fkey")
+  @@index([authorId])
+  @@index([branchId])
 }
 
 model PullRequest {
@@ -141,8 +141,8 @@ model PullRequest {
   baseBranch        Branch            @relation("BaseBranch", fields: [baseBranchranchId], references: [id])
   newBranch         Branch            @relation("NewBranch", fields: [newBranchranchId], references: [id])
 
-  @@index([baseBranchranchId], map: "PullRequest_baseBranchranchId_fkey")
-  @@index([newBranchranchId], map: "PullRequest_newBranchranchId_fkey")
+  @@index([baseBranchranchId])
+  @@index([newBranchranchId])
 }
 
 model ModelMerge {
@@ -156,20 +156,20 @@ model ModelMerge {
   pullRequest   PullRequest @relation(fields: [pullRequestId], references: [id])
   resultModel   Model?      @relation(fields: [resultModelId], references: [id])
 
-  @@index([pullRequestId], map: "ModelMerge_pullRequestId_fkey")
-  @@index([resultModelId], map: "ModelMerge_resultModelId_fkey")
+  @@index([pullRequestId])
+  @@index([resultModelId])
 }
 
 model RepositoryAccess {
-  id           String     @id
+  id           String     @id @default(cuid())
   repositoryId String
   userId       String
   createdAt    DateTime   @default(now())
   Repository   Repository @relation(fields: [repositoryId], references: [id])
   User         User       @relation(fields: [userId], references: [id])
 
-  @@index([repositoryId], map: "RepositoryAccess_repositoryId_fkey")
-  @@index([userId], map: "RepositoryAccess_userId_fkey")
+  @@index([repositoryId])
+  @@index([userId])
 }
 
 enum ModelStatus {

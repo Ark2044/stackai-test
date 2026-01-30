@@ -181,6 +181,12 @@
     -moz-osx-font-smoothing: grayscale;
   }
   
+  /* Content visibility optimization for off-screen content */
+  section {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 500px;
+  }
+  
   /* Professional typography scale */
   h1 {
     @apply text-5xl font-bold tracking-tight;
@@ -322,29 +328,35 @@
   }
 }
 
-/* Utility Classes */
+/* Utility Classes - GPU Accelerated */
 .animate-fade-in {
   animation: fade-in 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity;
 }
 
 .animate-fade-in-up {
   animation: fade-in-up 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
 }
 
 .animate-fade-in-down {
   animation: fade-in-down 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
 }
 
 .animate-slide-in-right {
   animation: slide-in-right 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
 }
 
 .animate-scale-in {
   animation: scale-in 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
 }
 
 .animate-float {
   animation: float 3s ease-in-out infinite;
+  will-change: transform;
 }
 
 .glass-effect {
@@ -619,12 +631,15 @@
   animation: glow-pulse 3s ease-in-out infinite;
 }
 
-/* Animated Background Orbs */
+/* Animated Background Orbs - GPU Accelerated */
 .orb {
   position: absolute;
   border-radius: 50%;
   filter: blur(60px);
   animation: orb-float 20s ease-in-out infinite;
+  will-change: transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }
 
 .orb-1 {
@@ -634,6 +649,7 @@
   top: -10%;
   left: -5%;
   animation-delay: 0s;
+  contain: strict;
 }
 
 .orb-2 {
@@ -643,6 +659,7 @@
   top: 20%;
   right: -10%;
   animation-delay: -5s;
+  contain: strict;
 }
 
 .orb-3 {
@@ -652,6 +669,7 @@
   bottom: 10%;
   left: 20%;
   animation-delay: -10s;
+  contain: strict;
 }
 
 .dark .orb-1 {

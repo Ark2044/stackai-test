@@ -90,6 +90,22 @@ export function useContract() {
     }
   }, [address, isConnected, dispatch]);
 
+  // Auto-initialize when wallet becomes connected.
+  useEffect(() => {
+    if (isConnected && address) {
+      void initializeContract();
+    } else {
+      // If disconnected, clear local contract state.
+      setState({
+        contract: null,
+        provider: null,
+        signer: null,
+        isLoading: false,
+        error: null,
+      });
+    }
+  }, [isConnected, address, initializeContract]);
+
   const loadBalances = async (contract: Contract, signer: ethers.Signer) => {
     try {
       const userAddress = await signer.getAddress();

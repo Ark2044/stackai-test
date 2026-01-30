@@ -85,13 +85,13 @@ export const ModalBody = ({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1, backdropFilter: "blur(10px)" }}
         exit={{ opacity: 0, backdropFilter: "blur(0px)" }}
-        className="fixed inset-0 z-50 flex items-center justify-center"
+        className="fixed inset-0 z-50 flex items-center justify-center p-4"
       >
         <Overlay />
         <motion.div
           ref={modalRef}
           className={cn(
-            "relative z-50 flex max-h-[90%] w-full max-w-lg flex-col bg-card text-card-foreground rounded-2xl shadow-xl border border-border",
+            "relative z-50 flex max-h-[75vh] sm:max-h-[85vh] w-full max-w-[400px] sm:max-w-[480px] flex-col overflow-hidden rounded-2xl border border-border/50 bg-card text-card-foreground shadow-2xl",
             className
           )}
         >
@@ -112,7 +112,13 @@ export const ModalContent = ({
   className?: string;
 }) => {
   return (
-    <div className={cn("flex flex-1 flex-col p-8 md:p-10", className)}>
+    <div
+      className={cn(
+        "flex-1 overflow-y-auto overflow-x-hidden overscroll-contain scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent hover:scrollbar-thumb-primary/30",
+        className
+      )}
+      style={{ WebkitOverflowScrolling: 'touch' }}
+    >
       {children}
     </div>
   );

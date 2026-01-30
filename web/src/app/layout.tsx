@@ -6,7 +6,6 @@ import { type Metadata } from "next";
 import Providers from "~/components/Providers";
 import { StoreProvider } from "~/components/providers/StoreProvider";
 import { AuthGuard } from "~/components/providers/AuthGuard";
-import { UserProvider } from "~/components/auth/AuthComponent";
 import { Toaster } from "~/components/ui/sonner";
 import MyLayout from "~/components/layout/MyLayout";
 import { ThemeProvider } from "~/components/theme-provider";
@@ -29,19 +28,17 @@ export default function RootLayout({
       <body>
         <StoreProvider>
           <Providers>
-            <UserProvider>
-              <ThemeProvider
-                attribute="class"
-                defaultTheme="system"
-                enableSystem
-                disableTransitionOnChange
-              >
-                <AuthGuard>
-                  <MyLayout>{children}</MyLayout>
-                  <Toaster />
-                </AuthGuard>
-              </ThemeProvider>
-            </UserProvider>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="system"
+              enableSystem
+              disableTransitionOnChange
+            >
+              <AuthGuard>
+                <MyLayout>{children}</MyLayout>
+                <Toaster />
+              </AuthGuard>
+            </ThemeProvider>
           </Providers>
         </StoreProvider>
       </body>

@@ -68,7 +68,12 @@ interface MLModel {
 export function ModelsVoting() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [userVotes, setUserVotes] = useState<Record<string, "yes" | "no" | "abstain">>({});
   const { address } = useWallet();
+
+  const handleVoteSuccess = (modelId: string, vote: "yes" | "no" | "abstain") => {
+    setUserVotes(prev => ({ ...prev, [modelId]: vote }));
+  };
 
   const models: MLModel[] = [
     {
@@ -234,9 +239,9 @@ export function ModelsVoting() {
       {/* Info Banner */}
       {!address ? (
         <div className="mb-8 animate-fade-in-up" style={{animationDelay: '0.1s'}}>
-          <div className="rounded-xl p-5 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border border-blue-500/20">
+          <div className="rounded-xl p-5 bg-linear-to-r from-blue-500/10 to-cyan-500/10 border border-blue-500/20">
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-              <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-primary/20 to-accent/20 shrink-0">
+              <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-linear-to-br from-primary/20 to-accent/20 shrink-0">
                 <Wallet className="h-6 w-6 text-primary" />
               </div>
               <div className="flex-1">
@@ -245,7 +250,7 @@ export function ModelsVoting() {
                   Connect your MetaMask wallet to start staking on model merges. Click the wallet button in the navbar to get started.
                 </p>
               </div>
-              <Button className="h-11 px-6 rounded-xl bg-gradient-to-r from-primary to-accent hover:opacity-90 text-white font-semibold shadow-lg shadow-primary/25 shrink-0">
+              <Button className="h-11 px-6 rounded-xl bg-linear-to-r from-primary to-accent hover:opacity-90 text-white font-semibold shadow-lg shadow-primary/25 shrink-0">
                 Connect Wallet
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
@@ -254,7 +259,7 @@ export function ModelsVoting() {
         </div>
       ) : (
         <div className="mb-8 animate-fade-in-up" style={{animationDelay: '0.1s'}}>
-          <div className="rounded-xl p-5 bg-gradient-to-r from-emerald-500/10 to-green-500/10 border border-emerald-500/30">
+          <div className="rounded-xl p-5 bg-linear-to-r from-emerald-500/10 to-green-500/10 border border-emerald-500/30">
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
               <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-emerald-500/20 shrink-0">
                 <TrendingUp className="h-6 w-6 text-emerald-500" />
@@ -298,7 +303,7 @@ export function ModelsVoting() {
               className={cn(
                 "rounded-xl h-10 px-4 transition-all duration-300",
                 selectedCategory === category 
-                  ? "bg-gradient-to-r from-primary to-accent text-white shadow-lg shadow-primary/25" 
+                  ? "bg-linear-to-r from-primary to-accent text-white shadow-lg shadow-primary/25" 
                   : "border-border/50 hover:border-primary/50 hover:bg-primary/5"
               )}
             >
@@ -317,16 +322,16 @@ export function ModelsVoting() {
             style={{animationDelay: `${0.25 + index * 0.05}s`}}
           >
             {/* Card Header */}
-            <div className="p-6 pb-4 border-b border-border/50 bg-gradient-to-r from-primary/5 to-accent/5">
+            <div className="p-6 pb-4 border-b border-border/50 bg-linear-to-r from-primary/5 to-accent/5">
               <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
                 <div className="space-y-3 flex-1">
                   <div className="flex flex-wrap items-center gap-3">
                     {/* Model Icon */}
                     <div className={cn(
                       "flex items-center justify-center w-12 h-12 rounded-xl transition-all duration-300 group-hover:scale-110",
-                      model.status === "pending" && "bg-gradient-to-br from-primary/20 to-accent/20",
-                      model.status === "approved" && "bg-gradient-to-br from-emerald-500/20 to-green-500/20",
-                      model.status === "rejected" && "bg-gradient-to-br from-rose-500/20 to-red-500/20"
+                      model.status === "pending" && "bg-linear-to-br from-primary/20 to-accent/20",
+                      model.status === "approved" && "bg-linear-to-br from-emerald-500/20 to-green-500/20",
+                      model.status === "rejected" && "bg-linear-to-br from-rose-500/20 to-red-500/20"
                     )}>
                       <Brain className={cn(
                         "h-6 w-6",
@@ -364,42 +369,71 @@ export function ModelsVoting() {
                 {/* Action Buttons */}
                 {model.status === "pending" && (
                   <div className="flex flex-wrap gap-2 shrink-0">
-                    <Modal>
-                      <ModalTrigger
-                        className="group/btn cursor-pointer bg-gradient-to-r from-emerald-500 to-green-500 hover:opacity-90 text-white flex h-11 items-center gap-2 px-5 text-sm shadow-lg shadow-emerald-500/25 rounded-xl font-semibold transition-all hover:shadow-xl hover:scale-105"
-                      >
-                        <ThumbsUp className="h-4 w-4 group-hover/btn:scale-110 transition-transform" />
-                        Approve
-                      </ModalTrigger>
-                      <ModalBody>
-                        <ModalContent className="overflow-auto">
-                          <TokenStaking 
-                            mergeId={model.mergeId} 
-                            prediction={true}
-                          />
-                        </ModalContent>
-                      </ModalBody>
-                    </Modal>
-                    <Modal>
-                      <ModalTrigger
-                        className="group/btn cursor-pointer bg-gradient-to-r from-rose-500 to-red-500 hover:opacity-90 text-white flex h-11 items-center gap-2 px-5 text-sm shadow-lg shadow-rose-500/25 rounded-xl font-semibold transition-all hover:shadow-xl hover:scale-105"
-                      >
-                        <ThumbsDown className="h-4 w-4 group-hover/btn:scale-110 transition-transform" />
-                        Reject
-                      </ModalTrigger>
-                      <ModalBody>
-                        <ModalContent className="overflow-auto">
-                          <TokenStaking 
-                            mergeId={model.mergeId} 
-                            prediction={false}
-                          />
-                        </ModalContent>
-                      </ModalBody>
-                    </Modal>
-                    <Button variant="outline" className="h-11 px-5 rounded-xl border-2 hover:border-muted-foreground/30 hover:bg-muted/50 font-semibold">
-                      <Minus className="h-4 w-4 mr-2" />
-                      Abstain
-                    </Button>
+                    {userVotes[model.id] ? (
+                      // Show user's vote status
+                      <div className={cn(
+                        "flex h-11 items-center gap-2 px-5 text-sm rounded-xl font-semibold border-2",
+                        userVotes[model.id] === "yes" && "bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400",
+                        userVotes[model.id] === "no" && "bg-rose-500/10 border-rose-500/30 text-rose-600 dark:text-rose-400",
+                        userVotes[model.id] === "abstain" && "bg-muted/50 border-border text-muted-foreground"
+                      )}>
+                        {userVotes[model.id] === "yes" && <ThumbsUp className="h-4 w-4" />}
+                        {userVotes[model.id] === "no" && <ThumbsDown className="h-4 w-4" />}
+                        {userVotes[model.id] === "abstain" && <Minus className="h-4 w-4" />}
+                        <span>
+                          {userVotes[model.id] === "yes" && "Voted Approve"}
+                          {userVotes[model.id] === "no" && "Voted Reject"}
+                          {userVotes[model.id] === "abstain" && "Abstained"}
+                        </span>
+                        <CheckCircle className="h-4 w-4 ml-1" />
+                      </div>
+                    ) : (
+                      // Show voting buttons
+                      <>
+                        <Modal>
+                          <ModalTrigger
+                            className="group/btn cursor-pointer bg-linear-to-r from-emerald-500 to-green-500 hover:opacity-90 text-white flex h-11 items-center gap-2 px-5 text-sm shadow-lg shadow-emerald-500/25 rounded-xl font-semibold transition-all hover:shadow-xl hover:scale-105"
+                          >
+                            <ThumbsUp className="h-4 w-4 group-hover/btn:scale-110 transition-transform" />
+                            Approve
+                          </ModalTrigger>
+                          <ModalBody>
+                            <ModalContent>
+                              <TokenStaking 
+                                mergeId={model.mergeId} 
+                                prediction={true}
+                                onSuccess={() => handleVoteSuccess(model.id, "yes")}
+                              />
+                            </ModalContent>
+                          </ModalBody>
+                        </Modal>
+                        <Modal>
+                          <ModalTrigger
+                            className="group/btn cursor-pointer bg-linear-to-r from-rose-500 to-red-500 hover:opacity-90 text-white flex h-11 items-center gap-2 px-5 text-sm shadow-lg shadow-rose-500/25 rounded-xl font-semibold transition-all hover:shadow-xl hover:scale-105"
+                          >
+                            <ThumbsDown className="h-4 w-4 group-hover/btn:scale-110 transition-transform" />
+                            Reject
+                          </ModalTrigger>
+                          <ModalBody>
+                            <ModalContent>
+                              <TokenStaking 
+                                mergeId={model.mergeId} 
+                                prediction={false}
+                                onSuccess={() => handleVoteSuccess(model.id, "no")}
+                              />
+                            </ModalContent>
+                          </ModalBody>
+                        </Modal>
+                        <Button 
+                          variant="outline" 
+                          className="h-11 px-5 rounded-xl border-2 hover:border-muted-foreground/30 hover:bg-muted/50 font-semibold"
+                          onClick={() => handleVoteSuccess(model.id, "abstain")}
+                        >
+                          <Minus className="h-4 w-4 mr-2" />
+                          Abstain
+                        </Button>
+                      </>
+                    )}
                   </div>
                 )}
               </div>
@@ -428,7 +462,7 @@ export function ModelsVoting() {
 
                 {/* Voting Progress */}
                 <div className="rounded-xl border border-border/50 overflow-hidden">
-                  <div className="p-4 bg-gradient-to-r from-primary/5 to-accent/5 border-b border-border/50">
+                  <div className="p-4 bg-linear-to-r from-primary/5 to-accent/5 border-b border-border/50">
                     <div className="flex justify-between items-center text-sm">
                       <span className="font-semibold">Voting Progress</span>
                       <span className="text-muted-foreground px-3 py-1 rounded-full bg-muted/50 text-xs font-medium">
@@ -437,7 +471,7 @@ export function ModelsVoting() {
                     </div>
                   </div>
                   <div className="grid grid-cols-2 divide-x divide-border/50">
-                    <div className="p-4 bg-gradient-to-br from-emerald-500/5 to-green-500/5">
+                    <div className="p-4 bg-linear-to-br from-emerald-500/5 to-green-500/5">
                       <div className="flex justify-between text-sm mb-2">
                         <span className="text-emerald-500 font-semibold flex items-center gap-2">
                           <ThumbsUp className="h-4 w-4" />
@@ -447,13 +481,13 @@ export function ModelsVoting() {
                       </div>
                       <div className="relative h-2.5 rounded-full bg-emerald-500/10 overflow-hidden">
                         <div 
-                          className="absolute inset-y-0 left-0 bg-gradient-to-r from-emerald-500 to-green-500 rounded-full transition-all duration-500"
+                          className="absolute inset-y-0 left-0 bg-linear-to-r from-emerald-500 to-green-500 rounded-full transition-all duration-500"
                           style={{ width: `${(model.yesVotes / model.totalVotes) * 100}%` }}
                         />
                       </div>
                       <p className="text-xs text-emerald-500/70 mt-1">{((model.yesVotes / model.totalVotes) * 100).toFixed(1)}%</p>
                     </div>
-                    <div className="p-4 bg-gradient-to-br from-rose-500/5 to-red-500/5">
+                    <div className="p-4 bg-linear-to-br from-rose-500/5 to-red-500/5">
                       <div className="flex justify-between text-sm mb-2">
                         <span className="text-rose-500 font-semibold flex items-center gap-2">
                           <ThumbsDown className="h-4 w-4" />
@@ -463,7 +497,7 @@ export function ModelsVoting() {
                       </div>
                       <div className="relative h-2.5 rounded-full bg-rose-500/10 overflow-hidden">
                         <div 
-                          className="absolute inset-y-0 left-0 bg-gradient-to-r from-rose-500 to-red-500 rounded-full transition-all duration-500"
+                          className="absolute inset-y-0 left-0 bg-linear-to-r from-rose-500 to-red-500 rounded-full transition-all duration-500"
                           style={{ width: `${(model.noVotes / model.totalVotes) * 100}%` }}
                         />
                       </div>
@@ -488,7 +522,7 @@ export function ModelsVoting() {
             
             {/* Bottom Accent Line */}
             <div className={cn(
-              "h-1 bg-gradient-to-r",
+              "h-1 bg-linear-to-r",
               model.status === "pending" && "from-primary via-accent to-primary",
               model.status === "approved" && "from-emerald-500 via-green-500 to-emerald-500",
               model.status === "rejected" && "from-rose-500 via-red-500 to-rose-500"

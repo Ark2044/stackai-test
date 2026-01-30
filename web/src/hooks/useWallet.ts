@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { BrowserProvider } from 'ethers';
 import { useAppDispatch, useAppSelector } from '~/store/hooks';
 import {
@@ -12,15 +12,18 @@ import {
   clearError,
   disconnectWallet,
 } from '~/store/slices/walletSlice';
-import { useContract } from './useContract';
 
 export function useWallet() {
   const dispatch = useAppDispatch();
   const walletState = useAppSelector((state) => state.wallet);
-  const { refreshBalances } = useContract();
+  const verificationAttempted = useRef(false);
 
   // Check on mount if we should auto-reconnect from persisted state
   useEffect(() => {
+    // Prevent multiple verification attempts
+    if (verificationAttempted.current) return;
+    verificationAttempted.current = true;
+    
     // If wallet was persisted as connected, verify it's still valid
     if (walletState.isConnected && walletState.address) {
       // Verify the connection is still valid with MetaMask
@@ -68,11 +71,6 @@ export function useWallet() {
     const handleChainChanged = (chainIdHex: string) => {
       const newChainId = parseInt(chainIdHex, 16);
       dispatch(setChainId(newChainId));
-      
-      // Reload balances when chain changes
-      if (walletState.isConnected) {
-        refreshBalances();
-      }
     };
 
     window.ethereum.on('accountsChanged', handleAccountsChanged);
@@ -82,7 +80,7 @@ export function useWallet() {
       window.ethereum.removeListener('accountsChanged', handleAccountsChanged);
       window.ethereum.removeListener('chainChanged', handleChainChanged);
     };
-  }, [walletState.address, walletState.isConnected, dispatch, refreshBalances]);
+  }, [walletState.address, dispatch]);
 
   const connectWithAccount = async (account: string) => {
     try {
@@ -95,9 +93,8 @@ export function useWallet() {
           chainId: Number(network.chainId),
         })
       );
-      
-      // Load balances
-      await refreshBalances();
+
+      // Note: balances are refreshed by `useContract` once it initializes.
     } catch (error) {
       console.error('Error connecting with account:', error);
     }
@@ -136,8 +133,7 @@ export function useWallet() {
         })
       );
 
-      // Load balances
-      await refreshBalances();
+      // Note: balances are refreshed by `useContract` once it initializes.
     } catch (error: any) {
       const errorMessage = error.message || 'Failed to connect to MetaMask';
       dispatch(setError(errorMessage));
@@ -146,7 +142,7 @@ export function useWallet() {
       localStorage.removeItem('wallet_explicit_connect');
       console.error('Connection error:', error);
     }
-  }, [dispatch, refreshBalances]);
+  }, [dispatch]);
 
   const disconnect = useCallback(() => {
     // Clear all wallet state
@@ -164,18 +160,20 @@ export function useWallet() {
     }
   }, [dispatch]);
 
-  const formatAddress = (address: string) => {
+  // Memoize formatAddress function
+  const formatAddress = useCallback((address: string) => {
     return `${address.slice(0, 6)}...${address.slice(-4)}`;
-  };
+  }, []);
 
-  return {
+  // Memoize the return object to prevent unnecessary re-renders
+  return useMemo(() => ({
     ...walletState,
     address: walletState.address,
     account: walletState.address, // Alias for compatibility
     connect,
     disconnect,
     formatAddress,
-  };
+  }), [walletState, connect, disconnect, formatAddress]);
 }
 
 // Extend Window interface for TypeScript

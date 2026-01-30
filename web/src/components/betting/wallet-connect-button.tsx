@@ -1,10 +1,10 @@
 "use client";
 
+import { memo, useEffect, useState, useCallback } from "react";
 import { Button } from "~/components/ui/button";
 import { Wallet, Coins, AlertCircle } from "lucide-react";
 import { useWallet } from "~/hooks/useWallet";
 import { useContract } from "~/hooks/useContract";
-import { useEffect, useState } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,7 +14,7 @@ import {
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 
-export function WalletConnectButton() {
+export const WalletConnectButton = memo(function WalletConnectButton() {
   const { address, isConnected, isConnecting, error, ethBalance, mmtBalance, connect, disconnect, formatAddress } = useWallet();
   const { contract, initializeContract } = useContract();
   const [showError, setShowError] = useState(false);
@@ -35,6 +35,14 @@ export function WalletConnectButton() {
     }
   }, [error]);
 
+  const handleConnect = useCallback(() => {
+    connect();
+  }, [connect]);
+
+  const handleDisconnect = useCallback(() => {
+    disconnect();
+  }, [disconnect]);
+
   if (error && showError) {
     return (
       <div className="flex items-center gap-2">
@@ -45,7 +53,7 @@ export function WalletConnectButton() {
         <Button
           variant="destructive"
           size="sm"
-          onClick={connect}
+          onClick={handleConnect}
           className="flex items-center gap-2"
         >
           <Wallet className="h-4 w-4" />
@@ -93,7 +101,7 @@ export function WalletConnectButton() {
             </div>
           </div>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={disconnect}>
+          <DropdownMenuItem onClick={handleDisconnect}>
             Disconnect Wallet
           </DropdownMenuItem>
         </DropdownMenuContent>
@@ -105,7 +113,7 @@ export function WalletConnectButton() {
     <Button
       variant="default"
       size="sm"
-      onClick={connect}
+      onClick={handleConnect}
       disabled={isConnecting}
       className="flex items-center gap-2"
       title="Connect your MetaMask wallet to place bets"
@@ -116,4 +124,4 @@ export function WalletConnectButton() {
       </span>
     </Button>
   );
-}
+});

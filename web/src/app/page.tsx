@@ -66,8 +66,8 @@ export default function HomePage() {
             
             {/* CTA Buttons - Aurora Style */}
             <div className="flex flex-col sm:flex-row gap-5 justify-center mb-20 animate-fade-in-up" style={{animationDelay: '0.3s'}}>
-              <Link href="/dashboard">
-                <Button size="lg" className="group relative gradient-primary text-white hover:opacity-95 transition-all text-base sm:text-lg px-10 sm:px-14 py-7 sm:py-8 h-auto font-semibold shadow-xl hover:shadow-2xl rounded-2xl overflow-hidden">
+              <Link href="/signup" className="cursor-pointer">
+                <Button size="lg" className="group relative gradient-primary text-white hover:opacity-95 transition-all text-base sm:text-lg px-10 sm:px-14 py-7 sm:py-8 h-auto font-semibold shadow-xl hover:shadow-2xl rounded-2xl overflow-hidden cursor-pointer">
                   <span className="relative z-10 flex items-center">
                     Get Started Free
                     <ArrowRight className="ml-3 h-5 w-5 group-hover:translate-x-2 transition-transform duration-300" />
@@ -75,8 +75,8 @@ export default function HomePage() {
                   <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
                 </Button>
               </Link>
-              <Link href="/validators/models">
-                <Button size="lg" variant="outline" className="group text-base sm:text-lg px-10 sm:px-14 py-7 sm:py-8 h-auto font-semibold bg-background/60 backdrop-blur-xl border-2 border-primary/20 hover:border-primary/50 hover:bg-primary/5 rounded-2xl transition-all duration-300 hover:shadow-lg">
+              <Link href="/validators/models" className="cursor-pointer">
+                <Button size="lg" variant="outline" className="group text-base sm:text-lg px-10 sm:px-14 py-7 sm:py-8 h-auto font-semibold bg-background/60 backdrop-blur-xl border-2 border-primary/20 hover:border-primary/50 hover:bg-primary/5 rounded-2xl transition-all duration-300 hover:shadow-lg cursor-pointer">
                   <Layers className="mr-3 h-5 w-5 text-primary group-hover:scale-110 transition-transform" />
                   Browse Models
                 </Button>
@@ -90,7 +90,7 @@ export default function HomePage() {
                 { icon: Zap, label: "Instant Rewards" },
                 { icon: Users, label: "10K+ Validators" }
               ].map((item, i) => (
-                <div key={i} className="group flex items-center gap-3 px-5 py-3 rounded-full bg-card/50 backdrop-blur-xl border border-border/50 hover:border-primary/30 transition-all duration-300 hover:shadow-md cursor-default">
+                <div key={i} className="group flex items-center gap-3 px-5 py-3 rounded-full bg-card/50 backdrop-blur-xl border border-border/50 hover:border-primary/30 transition-all duration-300 hover:shadow-md cursor-default select-none">
                   <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 group-hover:from-primary/30 group-hover:to-accent/30 transition-all">
                     <item.icon className="h-4 w-4 text-primary" />
                   </div>
@@ -210,7 +210,7 @@ export default function HomePage() {
               icon={<TrendingUp className="h-8 w-8" />}
               title="Earn Rewards"
               description="Win MMT tokens when your predictions are correct"
-              href="/dashboard"
+              href="/signup"
               color="chart-4"
             />
           </div>
@@ -227,7 +227,7 @@ export default function HomePage() {
               { value: "99.9%", label: "Uptime" },
               { value: "2.5s", label: "Avg. Reward Time" }
             ].map((stat, i) => (
-              <div key={i} className="text-center p-6 lg:p-8 rounded-2xl bg-card/50 backdrop-blur-xl border border-border/50 hover:border-primary/30 transition-all duration-300 hover:shadow-lg group">
+              <div key={i} className="text-center p-6 lg:p-8 rounded-2xl bg-card/50 backdrop-blur-xl border border-border/50 hover:border-primary/30 transition-all duration-300 hover:shadow-lg group cursor-default select-none">
                 <div className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gradient mb-2 group-hover:scale-105 transition-transform duration-300">
                   {stat.value}
                 </div>
@@ -265,14 +265,14 @@ export default function HomePage() {
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in-up" style={{animationDelay: '0.2s'}}>
-              <Link href="/login">
-                <Button size="lg" className="group gradient-primary text-white hover:opacity-95 text-base sm:text-lg px-12 py-8 h-auto font-semibold shadow-xl hover:shadow-2xl rounded-2xl">
+              <Link href="/signup" className="cursor-pointer">
+                <Button size="lg" className="group gradient-primary text-white hover:opacity-95 text-base sm:text-lg px-12 py-8 h-auto font-semibold shadow-xl hover:shadow-2xl rounded-2xl cursor-pointer">
                   Create Free Account
                   <ArrowRight className="ml-3 h-5 w-5 group-hover:translate-x-2 transition-transform duration-300" />
                 </Button>
               </Link>
-              <Link href="/validators/models">
-                <Button size="lg" variant="outline" className="text-base sm:text-lg px-12 py-8 h-auto font-semibold border-2 border-border hover:border-primary/50 rounded-2xl bg-background/60 backdrop-blur-xl">
+              <Link href="/validators/models" className="cursor-pointer">
+                <Button size="lg" variant="outline" className="text-base sm:text-lg px-12 py-8 h-auto font-semibold border-2 border-border hover:border-primary/50 rounded-2xl bg-background/60 backdrop-blur-xl cursor-pointer">
                   Explore Platform
                 </Button>
               </Link>

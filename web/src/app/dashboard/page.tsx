@@ -6,14 +6,89 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { useWallet } from "~/hooks/useWallet";
 import { Alert, AlertDescription } from "~/components/ui/alert";
-import { Wallet, TrendingUp, Activity, Award, Sparkles, ArrowRight, BarChart3, History, Zap } from "lucide-react";
+import { Wallet, TrendingUp, Activity, Award, Sparkles, ArrowRight, BarChart3, History, Zap, LogIn } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import Link from "next/link";
+import { useAuth } from "~/hooks/useAuth";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
-// Client-side rendered - needs wallet connection
+// Client-side rendered - needs authentication and wallet connection
 export default function DashboardPage() {
+  const { user, isAuthenticated, isLoading } = useAuth();
   const { address } = useWallet();
+  const router = useRouter();
 
+  // Redirect to login if not authenticated (non-blocking, happens in background)
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      router.push("/login");
+    }
+  }, [isAuthenticated, isLoading, router]);
+
+  // Render loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent" />
+          <p className="mt-4 text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // User not authenticated - show login prompt
+  if (!isAuthenticated || !user) {
+    return (
+      <div className="min-h-[calc(100vh-4rem)] relative overflow-hidden flex items-center justify-center p-4 sm:p-8">
+        {/* Background Effects */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="orb orb-1 opacity-60" />
+          <div className="orb orb-2 opacity-60" />
+        </div>
+        <div className="absolute inset-0 gradient-mesh opacity-40" />
+        <div className="absolute inset-0 grid-pattern opacity-30" />
+        
+        <div className="max-w-lg w-full mx-auto relative z-10">
+          <div className="card-glass p-10 sm:p-14 text-center animate-fade-in-up">
+            {/* Animated Icon */}
+            <div className="relative mb-10">
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="w-24 h-24 rounded-full bg-primary/20 animate-ping opacity-30" />
+              </div>
+              <div className="relative inline-flex items-center justify-center w-24 h-24 rounded-3xl bg-gradient-to-br from-primary/20 to-accent/20 border border-primary/20 group hover:scale-110 transition-all duration-500">
+                <LogIn className="h-10 w-10 text-primary" />
+              </div>
+            </div>
+            
+            <h2 className="text-3xl sm:text-4xl font-bold mb-5 tracking-tight">
+              Login <span className="text-gradient">Required</span>
+            </h2>
+            <p className="text-muted-foreground mb-10 text-base sm:text-lg leading-relaxed max-w-sm mx-auto">
+              Please sign in to access your dashboard and start earning rewards.
+            </p>
+            
+            <Link href="/login" className="cursor-pointer">
+              <Button size="lg" className="group gradient-primary text-white hover:opacity-95 shadow-xl hover:shadow-2xl px-10 py-7 h-auto rounded-2xl text-base font-semibold cursor-pointer">
+                Sign In Now
+                <ArrowRight className="ml-3 h-5 w-5 group-hover:translate-x-2 transition-transform duration-300" />
+              </Button>
+            </Link>
+            
+            <p className="mt-6 text-sm text-muted-foreground">
+              Don't have an account?{" "}
+              <Link href="/signup" className="text-primary hover:underline font-semibold cursor-pointer">
+                Sign up for free
+              </Link>
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // User authenticated but wallet not connected
   if (!address) {
     return (
       <div className="min-h-[calc(100vh-4rem)] relative overflow-hidden flex items-center justify-center p-4 sm:p-8">
@@ -111,7 +186,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Tabs Section */}
-        <Tabs defaultValue="overview" className="space-y-8 animate-fade-in-up" style={{animationDelay: '0.1s'}}>
+        <Tabs defaultValue="overview" className="space-y-8 animate-fade-in-up" style={{animationDelay: '0.1s'}} key={address || 'no-address'}>
           <TabsList className="grid w-full max-w-md grid-cols-2 h-14 p-1.5 rounded-xl bg-muted/50 backdrop-blur-sm border border-border/50">
             <TabsTrigger 
               value="overview" 
@@ -132,11 +207,11 @@ export default function DashboardPage() {
           </TabsList>
 
           <TabsContent value="overview" className="space-y-8 animate-fade-in">
-            <BettingDashboard />
+            <BettingDashboard key={`betting-${address}`} />
           </TabsContent>
 
           <TabsContent value="transactions" className="space-y-8 animate-fade-in">
-            <TransactionHistory />
+            <TransactionHistory key={`transactions-${address}`} />
           </TabsContent>
         </Tabs>
         

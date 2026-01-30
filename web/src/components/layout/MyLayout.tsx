@@ -1,20 +1,14 @@
 "use client";
 import {
-  CalendarFold,
   GitMerge,
   Home,
   PackageOpen,
-  PanelLeft,
-  User2,
   UserCircle2,
-  Users2,
-  ChevronDown,
   Layers,
   Menu,
-  X,
   FolderGit2,
 } from "lucide-react";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useMemo, memo } from "react";
 import { Input } from "~/components/ui/input";
 import { Search, Book } from "lucide-react";
 import { cn } from "~/lib/utils";
@@ -30,35 +24,43 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
-import type { User } from "@prisma/client";
 import { ModeToggle } from "./ModeToggle";
 import { usePathname } from "next/navigation";
-import { useUser } from "../auth/AuthComponent";
 import { useAuth } from "~/hooks/useAuth";
 import { WalletConnectButton } from "../betting/wallet-connect-button";
+
+// Guest links (before login)
+const guestLinks = [
+  { title: "Home", href: "/", icon: <Home className="h-5 w-5" /> },
+];
+
+// Authenticated links (after login)
+const authLinks = [
+  { title: "Home", href: "/", icon: <Home className="h-5 w-5" /> },
+  { title: "Dashboard", href: "/dashboard", icon: <PackageOpen className="h-5 w-5" /> },
+  { title: "Models", href: "/validators/models", icon: <Layers className="h-5 w-5" /> },
+  { title: "Repo", href: "/repo/demo/model-gpt-vision", icon: <FolderGit2 className="h-5 w-5" /> },
+  { title: "Merge", href: "/merge", icon: <GitMerge className="h-5 w-5" /> },
+];
 
 const Navbar = ({ children }: { children: React.ReactNode }) => {
   const pathname = usePathname();
   const [searchQuery, setSearchQuery] = useState("");
   const [scrolled, setScrolled] = useState(false);
-  const [links, setLinks] = useState([
-    { title: "Home", href: "/", icon: <Home className="h-5 w-5" /> },
-    { title: "Dashboard", href: "/dashboard", icon: <PackageOpen className="h-5 w-5" /> },
-    { title: "Models", href: "/validators/models", icon: <Layers className="h-5 w-5" /> },
-    { title: "Repo", href: "/repo/demo/model-gpt-vision", icon: <FolderGit2 className="h-5 w-5" /> },
-    { title: "Merge", href: "/merge", icon: <GitMerge className="h-5 w-5" /> },
-  ]);
-  const { user } = useUser();
-  const { logout } = useAuth();
+  const { user, logout } = useAuth();
 
-  // Track scroll for header blur effect
-  useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 20);
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+  // Track scroll for header blur effect - optimized with passive listener
+  const handleScroll = useCallback(() => {
+    setScrolled(window.scrollY > 20);
   }, []);
+
+  useEffect(() => {
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [handleScroll]);
+
+  // Memoize links to prevent re-computation
+  const links = useMemo(() => user ? authLinks : guestLinks, [user]);
 
   return (
     <>
@@ -73,7 +75,7 @@ const Navbar = ({ children }: { children: React.ReactNode }) => {
           <div className="flex items-center justify-between h-16 lg:h-18">
             {/* Logo */}
             <div className="flex items-center space-x-8 lg:space-x-12">
-              <Link href="/" className="flex items-center space-x-3 group">
+              <Link href="/" className="flex items-center space-x-3 group cursor-pointer">
                 <div className="relative">
                   <div className="absolute inset-0 bg-primary/30 blur-xl group-hover:bg-primary/40 transition-all duration-500 rounded-full" />
                   <div className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-primary/20 to-accent/20 group-hover:from-primary/30 group-hover:to-accent/30 transition-all duration-300">
@@ -97,16 +99,18 @@ const Navbar = ({ children }: { children: React.ReactNode }) => {
             
             {/* Right Side Actions */}
             <div className="flex items-center space-x-3 lg:space-x-4">
-              {/* Search - Desktop only */}
-              <div className="relative hidden md:block">
-                <Search className="absolute left-3.5 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 w-48 lg:w-64 h-10 bg-muted/30 border-border/50 focus:border-primary/50 focus:bg-background/80 transition-all rounded-xl backdrop-blur-sm"
-                />
-              </div>
+              {/* Search - Desktop only - Hidden for guests */}
+              {user && (
+                <div className="relative hidden md:block">
+                  <Search className="absolute left-3.5 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-10 w-48 lg:w-64 h-10 bg-muted/30 border-border/50 focus:border-primary/50 focus:bg-background/80 transition-all rounded-xl backdrop-blur-sm"
+                  />
+                </div>
+              )}
               
               <ModeToggle />
               
@@ -115,38 +119,18 @@ const Navbar = ({ children }: { children: React.ReactNode }) => {
                   <WalletConnectButton />
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" className="relative h-10 w-10 rounded-xl hover:bg-primary/10 transition-all duration-300 border border-transparent hover:border-primary/20">
-                        {user.image ? (
-                          <Image
-                            src={user.image}
-                            height={36}
-                            width={36}
-                            className="rounded-lg object-cover"
-                            alt={user.name!}
-                          />
-                        ) : (
-                          <UserCircle2 className="h-5 w-5" />
-                        )}
+                      <Button variant="ghost" className="relative h-10 w-10 rounded-xl hover:bg-primary/10 transition-all duration-300 border border-transparent hover:border-primary/20 cursor-pointer">
+                        <UserCircle2 className="h-5 w-5" />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-64 rounded-2xl p-2 border-border/50 bg-card/95 backdrop-blur-xl">
                       <DropdownMenuLabel className="px-3 py-3">
                         <div className="flex items-center space-x-3">
                           <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-primary/20 to-accent/20">
-                            {user.image ? (
-                              <Image
-                                src={user.image}
-                                height={40}
-                                width={40}
-                                className="rounded-lg object-cover"
-                                alt={user.name!}
-                              />
-                            ) : (
-                              <UserCircle2 className="h-5 w-5 text-primary" />
-                            )}
+                            <UserCircle2 className="h-5 w-5 text-primary" />
                           </div>
                           <div className="flex flex-col space-y-0.5">
-                            <p className="text-sm font-semibold">{user.name}</p>
+                            <p className="text-sm font-semibold">{user.name || 'User'}</p>
                             <p className="text-xs text-muted-foreground truncate max-w-[150px]">{user.email}</p>
                           </div>
                         </div>
@@ -175,8 +159,8 @@ const Navbar = ({ children }: { children: React.ReactNode }) => {
                   </DropdownMenu>
                 </>
               ) : (
-                <Link href="/login">
-                  <Button className="gradient-primary text-white hover:opacity-95 shadow-md hover:shadow-lg rounded-xl px-6 transition-all duration-300">
+                <Link href="/login" className="cursor-pointer">
+                  <Button className="gradient-primary text-white hover:opacity-95 shadow-md hover:shadow-lg rounded-xl px-6 transition-all duration-300 cursor-pointer">
                     Sign In
                   </Button>
                 </Link>
@@ -185,7 +169,7 @@ const Navbar = ({ children }: { children: React.ReactNode }) => {
               {/* Mobile Menu Button */}
               <Sheet>
                 <SheetTrigger asChild>
-                  <Button variant="ghost" size="icon" className="lg:hidden rounded-xl hover:bg-primary/10 border border-transparent hover:border-primary/20">
+                  <Button variant="ghost" size="icon" className="lg:hidden rounded-xl hover:bg-primary/10 border border-transparent hover:border-primary/20 cursor-pointer">
                     <Menu className="h-5 w-5" />
                     <span className="sr-only">Toggle Menu</span>
                   </Button>
@@ -194,7 +178,7 @@ const Navbar = ({ children }: { children: React.ReactNode }) => {
                   <div className="flex flex-col h-full">
                     {/* Mobile Header */}
                     <div className="flex items-center justify-between p-4 border-b border-border/50">
-                      <Link href="/" className="flex items-center space-x-2">
+                      <Link href="/" className="flex items-center space-x-2 cursor-pointer">
                         <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-gradient-to-br from-primary/20 to-accent/20">
                           <Book className="h-4 w-4 text-primary" />
                         </div>
@@ -204,18 +188,20 @@ const Navbar = ({ children }: { children: React.ReactNode }) => {
                       </Link>
                     </div>
                     
-                    {/* Mobile Search */}
-                    <div className="p-4 border-b border-border/50">
-                      <div className="relative">
-                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input
-                          placeholder="Search..."
-                          value={searchQuery}
-                          onChange={(e) => setSearchQuery(e.target.value)}
-                          className="pl-10 h-11 bg-muted/30 border-border/50 rounded-xl"
-                        />
+                    {/* Mobile Search - Hidden for guests */}
+                    {user && (
+                      <div className="p-4 border-b border-border/50">
+                        <div className="relative">
+                          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                          <Input
+                            placeholder="Search..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="pl-10 h-11 bg-muted/30 border-border/50 rounded-xl"
+                          />
+                        </div>
                       </div>
-                    </div>
+                    )}
                     
                     {/* Mobile Navigation */}
                     <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
@@ -224,7 +210,7 @@ const Navbar = ({ children }: { children: React.ReactNode }) => {
                           <Link
                             href={link.href}
                             className={cn(
-                              "flex items-center gap-4 px-4 py-3.5 rounded-xl transition-all duration-300",
+                              "flex items-center gap-4 px-4 py-3.5 rounded-xl transition-all duration-300 cursor-pointer",
                               pathname === link.href 
                                 ? "bg-primary/10 text-primary font-medium border border-primary/20" 
                                 : "hover:bg-muted/50 text-muted-foreground hover:text-foreground"
@@ -248,23 +234,13 @@ const Navbar = ({ children }: { children: React.ReactNode }) => {
                     <div className="p-4 border-t border-border/50 mt-auto">
                       {user ? (
                         <div className="space-y-4">
-                          <Link href={`/profile/${user.id}`}>
-                            <div className="flex items-center gap-4 px-4 py-3 rounded-xl bg-muted/30 hover:bg-muted/50 transition-colors">
+                          <Link href={`/profile/${user.id}`} className="cursor-pointer">
+                            <div className="flex items-center gap-4 px-4 py-3 rounded-xl bg-muted/30 hover:bg-muted/50 transition-colors cursor-pointer">
                               <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-primary/20 to-accent/20">
-                                {user.image ? (
-                                  <Image
-                                    src={user.image}
-                                    height={48}
-                                    width={48}
-                                    className="rounded-xl object-cover"
-                                    alt={user.name!}
-                                  />
-                                ) : (
-                                  <UserCircle2 className="h-6 w-6 text-primary" />
-                                )}
+                                <UserCircle2 className="h-6 w-6 text-primary" />
                               </div>
                               <div className="flex-1 min-w-0">
-                                <p className="font-semibold truncate">{user.name}</p>
+                                <p className="font-semibold truncate">{user.name || 'User'}</p>
                                 <p className="text-sm text-muted-foreground truncate">{user.email}</p>
                               </div>
                             </div>
@@ -272,14 +248,14 @@ const Navbar = ({ children }: { children: React.ReactNode }) => {
                           <Button
                             onClick={logout}
                             variant="destructive"
-                            className="w-full h-12 rounded-xl"
+                            className="w-full h-12 rounded-xl cursor-pointer"
                           >
                             Sign Out & Disconnect
                           </Button>
                         </div>
                       ) : (
-                        <Link href="/login" className="block">
-                          <Button className="w-full h-12 gradient-primary text-white rounded-xl">
+                        <Link href="/login" className="block cursor-pointer">
+                          <Button className="w-full h-12 gradient-primary text-white rounded-xl cursor-pointer">
                             Sign In
                           </Button>
                         </Link>
@@ -302,8 +278,8 @@ const Navbar = ({ children }: { children: React.ReactNode }) => {
 
 export default Navbar;
 
-// Navigation Link Component
-function NavLink({ 
+// Navigation Link Component - Memoized for performance
+const NavLink = memo(function NavLink({ 
   href, 
   active, 
   children 
@@ -316,7 +292,7 @@ function NavLink({
     <Link
       href={href}
       className={cn(
-        "px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 relative group",
+        "px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 relative group cursor-pointer",
         active
           ? "text-primary bg-primary/10 border border-primary/20"
           : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
@@ -331,7 +307,7 @@ function NavLink({
       )}
     </Link>
   );
-}
+});
 
 const ListItem = React.forwardRef<
   React.ElementRef<"a">,

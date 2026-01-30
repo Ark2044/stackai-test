@@ -9,13 +9,12 @@ const PROTECTED_ROUTES = [
   '/dashboard',
   '/validators/models',
   '/repo',
+  '/merge',
+  '/profile',
 ];
 
-// Pages that should redirect to dashboard if already authenticated
-const AUTH_ONLY_ROUTES = ['/login', '/signup'];
-
 // Pages accessible to everyone
-const PUBLIC_ROUTES = ['/', '/auth/cli'];
+const PUBLIC_ROUTES = ['/', '/login', '/signup', '/auth/cli'];
 
 export function AuthGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -27,15 +26,13 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
     if (isLoading) return;
 
     const isProtected = PROTECTED_ROUTES.some((route) => pathname.startsWith(route));
-    const isAuthOnly = AUTH_ONLY_ROUTES.some((route) => pathname.startsWith(route));
+    const isPublic = PUBLIC_ROUTES.some((route) => pathname === route || pathname.startsWith(route));
 
+    // Only redirect if trying to access a protected route without authentication
     if (isProtected && !isAuthenticated) {
-      // Redirect to login if trying to access protected route without auth
       router.push(`/login?redirect=${encodeURIComponent(pathname)}`);
-    } else if (isAuthOnly && isAuthenticated) {
-      // Redirect to dashboard if trying to access login/signup while authenticated
-      router.push('/dashboard');
     }
+    // Don't redirect authenticated users away from login/signup - let them see the pages
   }, [isAuthenticated, isLoading, pathname, router]);
 
   // Don't block rendering, just show content

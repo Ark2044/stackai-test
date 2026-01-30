@@ -3,14 +3,23 @@ import { db } from "~/server/db";
 import { type User } from "@prisma/client";
 import bcrypt from "bcryptjs";
 
-export async function getUser(email: string) {
-  const user: User | null = await db.user.findUnique({
-    where: {
-      email: email,
-    },
-  });
+export async function getUser(email: string): Promise<User | null> {
+  // Guard: Don't attempt database connection without valid email
+  if (!email || typeof email !== 'string' || email.trim() === '') {
+    return null;
+  }
 
-  return user;
+  try {
+    const user: User | null = await db.user.findUnique({
+      where: {
+        email: email,
+      },
+    });
+    return user;
+  } catch (error) {
+    console.error('Error fetching user:', error);
+    return null;
+  }
 }
 
 export async function createUser({
